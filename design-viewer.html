@@ -1,0 +1,2221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visualise Design MD</title>
+  <style>
+    :root {
+      --bg: oklch(97% 0.012 78);
+      --surface: oklch(99% 0.006 78);
+      --surface-muted: oklch(94% 0.014 78);
+      --surface-strong: oklch(90% 0.02 78);
+      --line: oklch(86% 0.018 78);
+      --line-strong: oklch(75% 0.025 78);
+      --text: oklch(19% 0.025 70);
+      --text-muted: oklch(48% 0.025 70);
+      --text-soft: oklch(62% 0.024 70);
+      --accent: oklch(62% 0.13 32);
+      --accent-soft: oklch(94% 0.045 32);
+      --info: oklch(58% 0.13 235);
+      --info-soft: oklch(94% 0.035 235);
+      --warning: oklch(72% 0.15 80);
+      --warning-soft: oklch(96% 0.055 80);
+      --error: oklch(60% 0.18 25);
+      --error-soft: oklch(95% 0.045 25);
+      --success: oklch(58% 0.12 155);
+      --success-soft: oklch(94% 0.04 155);
+      --radius: 6px;
+      --font-sans: "Avenir Next", Avenir, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% -10%, color-mix(in oklch, var(--accent-soft) 72%, transparent) 0 28rem, transparent 29rem),
+        radial-gradient(circle at 85% 12%, oklch(94% 0.035 128 / 0.65) 0 24rem, transparent 25rem),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.32;
+      background-image:
+        linear-gradient(90deg, color-mix(in oklch, var(--text) 7%, transparent) 1px, transparent 1px),
+        linear-gradient(color-mix(in oklch, var(--text) 5%, transparent) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: minmax(210px, auto) 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 72px;
+      padding: 14px 24px;
+      background: color-mix(in oklch, var(--bg) 78%, transparent);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .search-wrap {
+      position: relative;
+      min-width: 220px;
+      max-width: 420px;
+      width: 38vw;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--text-soft);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 560;
+      text-decoration: none;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .button:hover {
+      background: var(--surface-muted);
+      border-color: var(--line-strong);
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .button.primary {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--bg);
+    }
+
+    .button.primary:hover {
+      background: color-mix(in oklch, var(--text) 88%, var(--accent));
+    }
+
+    .file-input {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .workspace {
+      display: block;
+      min-height: 0;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: var(--surface-muted);
+      padding: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .panel + .panel {
+      margin-top: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 40px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 650;
+    }
+
+    .panel-body {
+      padding: 10px;
+    }
+
+    .metrics {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      min-height: 28px;
+      padding: 4px 8px;
+      border: 1px solid color-mix(in oklch, var(--line) 78%, transparent);
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--surface) 74%, transparent);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .metric strong {
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 760;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric span {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .metric.warning {
+      border-color: color-mix(in oklch, var(--warning) 38%, var(--line));
+      background: color-mix(in oklch, var(--warning-soft) 70%, var(--surface));
+    }
+
+    .metric.error {
+      border-color: color-mix(in oklch, var(--error) 28%, var(--line));
+      background: color-mix(in oklch, var(--error-soft) 74%, var(--surface));
+    }
+
+    .outline {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .outline a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 28px;
+      padding: 5px 8px;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-size: 12px;
+      text-decoration: none;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .outline a:hover,
+    .outline a.active {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .outline .depth-1 { padding-left: 8px; font-weight: 640; }
+    .outline .depth-2 { padding-left: 18px; }
+    .outline .depth-3 { padding-left: 28px; }
+    .outline .depth-4,
+    .outline .depth-5,
+    .outline .depth-6 { padding-left: 38px; }
+
+    .badge,
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 20px;
+      padding: 2px 6px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 650;
+      white-space: nowrap;
+      text-transform: lowercase;
+    }
+
+    .badge.info { color: var(--info); background: var(--info-soft); border-color: color-mix(in oklch, var(--info) 28%, var(--line)); }
+    .badge.warning { color: color-mix(in oklch, var(--warning) 72%, var(--text)); background: var(--warning-soft); border-color: color-mix(in oklch, var(--warning) 42%, var(--line)); }
+    .badge.error { color: var(--error); background: var(--error-soft); border-color: color-mix(in oklch, var(--error) 28%, var(--line)); }
+    .badge.success { color: var(--success); background: var(--success-soft); border-color: color-mix(in oklch, var(--success) 28%, var(--line)); }
+
+    .issue-list,
+    .review-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .issue,
+    .review-item {
+      display: grid;
+      gap: 6px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .issue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .issue-title,
+    .review-title {
+      font-weight: 640;
+      font-size: 12px;
+    }
+
+    .issue p,
+    .review-item p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .empty-copy {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .main {
+      min-width: 0;
+      width: min(1500px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 20px 0 32px;
+    }
+
+    .drop-zone {
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      margin-bottom: 18px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 18px;
+      background: color-mix(in oklch, var(--surface) 76%, transparent);
+      box-shadow: 0 24px 80px oklch(20% 0.03 70 / 0.08);
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .drop-zone.dragging {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .drop-inner {
+      max-width: 520px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .drop-inner h2 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .drop-inner p {
+      margin: 0 auto 18px;
+      max-width: 60ch;
+      color: var(--text-muted);
+    }
+
+    .drop-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .status-line {
+      display: grid;
+      grid-template-columns: minmax(220px, auto) 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 44px;
+      margin-bottom: 14px;
+      padding: 8px 10px;
+      border: 1px solid color-mix(in oklch, var(--line) 62%, transparent);
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--surface) 78%, transparent);
+      color: var(--text-muted);
+      font-size: 12px;
+      backdrop-filter: blur(12px);
+    }
+
+    .document-id {
+      min-width: 0;
+      padding-left: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .document-id strong {
+      color: var(--text);
+      font-weight: 760;
+    }
+
+    .search-state {
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 3px;
+      margin-left: auto;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-muted);
+    }
+
+    .view-toggle button {
+      min-height: 30px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 620;
+    }
+
+    .view-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .viewer-grid {
+      display: block;
+    }
+
+    .document-panel {
+      min-width: 0;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+
+    .document-panel .panel-body {
+      padding: 0;
+    }
+
+    .raw-view {
+      display: none;
+    }
+
+    body[data-mobile-view="raw"] .rendered-view {
+      display: none;
+    }
+
+    body[data-mobile-view="raw"] .raw-view {
+      display: block;
+    }
+
+    .rendered,
+    .raw {
+      min-height: 650px;
+      max-height: calc(100vh - 186px);
+      overflow: auto;
+      padding: 34px;
+    }
+
+    .raw {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: color-mix(in oklch, var(--surface-muted) 76%, var(--surface));
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+
+    .markdown {
+      max-width: 82ch;
+    }
+
+    .markdown h1,
+    .markdown h2,
+    .markdown h3,
+    .markdown h4,
+    .markdown h5,
+    .markdown h6 {
+      scroll-margin-top: 88px;
+      margin: 28px 0 10px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .markdown h1:first-child,
+    .markdown h2:first-child,
+    .markdown h3:first-child {
+      margin-top: 0;
+    }
+
+    .markdown h1 { font-size: 38px; font-weight: 780; letter-spacing: -0.02em; }
+    .markdown h2 { font-size: 24px; font-weight: 720; letter-spacing: -0.01em; }
+    .markdown h3 { font-size: 16px; font-weight: 660; }
+    .markdown h4,
+    .markdown h5,
+    .markdown h6 { font-size: 14px; font-weight: 650; }
+
+    .markdown p {
+      margin: 10px 0;
+      color: var(--text-muted);
+    }
+
+    .markdown strong {
+      color: var(--text);
+      font-weight: 690;
+    }
+
+    .markdown a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .markdown ul,
+    .markdown ol {
+      margin: 10px 0;
+      padding-left: 22px;
+      color: var(--text-muted);
+    }
+
+    .markdown li + li {
+      margin-top: 4px;
+    }
+
+    .markdown code,
+    .raw code {
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+    }
+
+    .markdown :not(pre) > code {
+      padding: 2px 5px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface-muted);
+      color: var(--text);
+    }
+
+    .markdown pre {
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+      color: var(--text-muted);
+    }
+
+    .markdown blockquote {
+      margin: 14px 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+      color: var(--text-muted);
+    }
+
+    .table-wrap {
+      max-width: 100%;
+      overflow: auto;
+      margin: 14px 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface-muted);
+      color: var(--text);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .color-value {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .color-swatch {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      border: 1px solid color-mix(in oklch, var(--line-strong) 82%, var(--text));
+      border-radius: 4px;
+      background:
+        linear-gradient(45deg, color-mix(in oklch, var(--surface-muted) 70%, var(--line)) 25%, transparent 25%),
+        linear-gradient(-45deg, color-mix(in oklch, var(--surface-muted) 70%, var(--line)) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, color-mix(in oklch, var(--surface-muted) 70%, var(--line)) 75%),
+        linear-gradient(-45deg, transparent 75%, color-mix(in oklch, var(--surface-muted) 70%, var(--line)) 75%);
+      background-color: var(--surface);
+      background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+      background-size: 18px 18px;
+      overflow: hidden;
+    }
+
+    .color-swatch::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--swatch-color);
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .fake-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      color: var(--surface);
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .check-item.checked .fake-check {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .section-highlight {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      vertical-align: middle;
+    }
+
+    .search-hit {
+      border-radius: var(--radius);
+      background: color-mix(in oklch, var(--accent-soft) 65%, transparent);
+      box-shadow: 0 0 0 6px color-mix(in oklch, var(--accent-soft) 45%, transparent);
+    }
+
+    mark {
+      padding: 0 2px;
+      border-radius: 3px;
+      background: var(--warning-soft);
+      color: var(--text);
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .studio-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .document-stack {
+      min-width: 0;
+    }
+
+    .inspector {
+      position: sticky;
+      top: 92px;
+      max-height: calc(100vh - 112px);
+      overflow: hidden;
+      border-radius: 18px;
+      background: color-mix(in oklch, var(--surface) 84%, transparent);
+      border: 1px solid color-mix(in oklch, var(--line) 70%, transparent);
+      backdrop-filter: blur(14px);
+    }
+
+    .inspector-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .inspector-tab {
+      min-height: 30px;
+      padding: 0 9px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .inspector-tab:hover {
+      background: var(--surface-muted);
+      color: var(--text);
+    }
+
+    .inspector-tab:active {
+      transform: scale(0.98);
+    }
+
+    .inspector-tab.active {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .inspector-panel {
+      display: none;
+      max-height: calc(100vh - 166px);
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .inspector-panel.active {
+      display: block;
+    }
+
+    .inspector-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .inspector-title h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .review-panel {
+      min-width: 0;
+    }
+
+    .table-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .component-card {
+      position: relative;
+      overflow: hidden;
+      gap: 10px;
+    }
+
+    .component-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--accent);
+    }
+
+    .component-preview {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      min-height: 54px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+    }
+
+    .component-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface-muted);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 620;
+    }
+
+    .sample-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .sample-button.primary {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--bg);
+    }
+
+    .sample-button.ghost {
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+
+    .sample-card {
+      width: min(100%, 220px);
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .sample-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .sample-card span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .sample-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .sample-nav span {
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 640;
+    }
+
+    .sample-nav span:first-child {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .sample-avatar {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 34%, var(--accent-soft) 0 20%, transparent 21%),
+        radial-gradient(circle at 50% 76%, color-mix(in oklch, var(--accent-soft) 58%, var(--surface)) 0 34%, transparent 35%),
+        var(--surface);
+    }
+
+    .sample-state-stack {
+      display: grid;
+      gap: 6px;
+      width: min(100%, 220px);
+    }
+
+    .sample-state-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 28px;
+      padding: 0 8px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .sample-state-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .component-notes {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1180px) {
+      .studio-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .inspector {
+        position: static;
+        max-height: none;
+      }
+
+      .inspector-panel {
+        max-height: none;
+      }
+
+      .raw,
+      .rendered {
+        max-height: 620px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .topbar {
+        position: static;
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        justify-content: stretch;
+        flex-wrap: wrap;
+      }
+
+      .search-wrap {
+        width: 100%;
+        max-width: none;
+        order: 3;
+      }
+
+      .workspace {
+        display: block;
+      }
+
+      .main {
+        width: min(100vw - 20px, 1500px);
+        padding: 12px 0 28px;
+      }
+
+      .status-line {
+        grid-template-columns: 1fr;
+        align-items: start;
+        border-radius: 18px;
+      }
+
+      .search-state {
+        justify-self: start;
+      }
+
+      .viewer-grid {
+        display: block;
+      }
+
+      .rendered,
+      .raw {
+        max-height: none;
+        min-height: 420px;
+        padding: 18px;
+      }
+
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .drop-inner {
+        padding: 22px 16px;
+      }
+
+      .drop-inner h2 {
+        font-size: 20px;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .toolbar .button {
+        width: auto;
+        flex: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body data-mobile-view="rendered">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Visualise Design MD</h1>
+        <span id="fileStatus">No file loaded. Everything stays in this browser.</span>
+      </div>
+      <div class="search-wrap">
+        <label class="visually-hidden" for="searchInput">Search document</label>
+        <input id="searchInput" type="search" placeholder="Search headings, checks, tables, raw Markdown" autocomplete="off" disabled>
+      </div>
+      <div class="toolbar">
+        <button class="button" id="sampleButton" type="button">Load sample</button>
+        <label class="button primary" for="fileInput">Choose file</label>
+        <input class="file-input" id="fileInput" type="file" accept=".md,.markdown,text/markdown,text/plain">
+      </div>
+    </header>
+
+    <div class="workspace">
+      <main class="main">
+        <section class="drop-zone" id="dropZone">
+          <div class="drop-inner">
+            <h2>Drop a design.md file here</h2>
+            <p>Review headings, checklists, tables, raw Markdown, and structural issues locally. No file content is uploaded.</p>
+            <div class="drop-actions">
+              <label class="button primary" for="fileInput">Choose Markdown</label>
+              <button class="button" id="sampleButtonLarge" type="button">Try sample</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="status-line" id="documentStatus" hidden aria-label="Document status">
+          <span class="document-id"><strong id="documentName">Untitled</strong> <span id="documentMeta"></span></span>
+          <span class="metrics" id="metrics"></span>
+          <span class="search-state" id="searchStatus">Search inactive</span>
+        </div>
+
+        <section class="studio-layout" aria-label="Markdown review workspace">
+          <div class="document-stack">
+            <section class="viewer-grid" aria-label="Markdown document view">
+              <article class="panel document-panel">
+                <div class="panel-header">
+                  <h2 id="documentViewTitle">Rendered</h2>
+                  <div class="view-toggle" aria-label="Switch document view">
+                    <button type="button" class="active" data-view-tab="rendered">Rendered</button>
+                    <button type="button" data-view-tab="raw">Raw</button>
+                  </div>
+                  <span class="badge info" id="sectionBadge">ready</span>
+                  <span class="badge info" id="rawLineCount" hidden>0 lines</span>
+                </div>
+                <div class="panel-body">
+                  <div class="rendered rendered-view">
+                    <div class="markdown" id="renderedOutput">
+                      <p class="empty-copy">Rendered Markdown appears here after you load a file.</p>
+                    </div>
+                  </div>
+                  <pre class="raw raw-view" id="rawOutput">Raw Markdown appears here after you load a file.</pre>
+                </div>
+              </article>
+            </section>
+          </div>
+
+          <aside class="inspector" aria-label="Document inspector">
+            <div class="inspector-tabs" role="tablist" aria-label="Inspector tabs">
+              <button class="inspector-tab active" type="button" data-inspector-tab="outline">Outline</button>
+              <button class="inspector-tab" type="button" data-inspector-tab="issues">Issues</button>
+              <button class="inspector-tab" type="button" data-inspector-tab="checks">Checks</button>
+              <button class="inspector-tab" type="button" data-inspector-tab="tables">Tables</button>
+              <button class="inspector-tab" type="button" data-inspector-tab="components">Components</button>
+              <button class="inspector-tab" type="button" data-inspector-tab="sections">Sections</button>
+            </div>
+
+            <section class="inspector-panel active" data-inspector-panel="outline">
+              <div class="inspector-title">
+                <h3>Outline</h3>
+                <span class="count-badge" id="outlineCount">0</span>
+              </div>
+              <nav class="outline" id="outlineNav" aria-label="Heading outline">
+                <p class="empty-copy">Load a Markdown file to generate an outline.</p>
+              </nav>
+            </section>
+
+            <section class="inspector-panel" data-inspector-panel="issues">
+              <div class="inspector-title">
+                <h3>Issues</h3>
+                <span class="count-badge" id="issueCount">0</span>
+              </div>
+              <div class="issue-list" id="issueList">
+                <p class="empty-copy">No document loaded.</p>
+              </div>
+            </section>
+
+            <section class="inspector-panel" data-inspector-panel="checks">
+              <div class="inspector-title">
+                <h3>Unchecked items</h3>
+                <span class="count-badge" id="uncheckedCount">0</span>
+              </div>
+              <div class="review-list" id="uncheckedList">
+                <p class="empty-copy">No unchecked items yet.</p>
+              </div>
+            </section>
+
+            <section class="inspector-panel" data-inspector-panel="tables">
+              <div class="inspector-title">
+                <h3>Tables</h3>
+                <span class="count-badge" id="tableCount">0</span>
+              </div>
+              <div class="review-list" id="tableList">
+                <p class="empty-copy">No tables detected yet.</p>
+              </div>
+            </section>
+
+            <section class="inspector-panel" data-inspector-panel="components">
+              <div class="inspector-title">
+                <h3>Components</h3>
+                <span class="count-badge" id="componentCount">0</span>
+              </div>
+              <div class="review-list" id="componentList">
+                <p class="empty-copy">No component subsections detected yet.</p>
+              </div>
+            </section>
+
+            <section class="inspector-panel" data-inspector-panel="sections">
+              <div class="inspector-title">
+                <h3>Design sections</h3>
+                <span class="count-badge" id="designSectionCount">0</span>
+              </div>
+              <div class="review-list" id="sectionList">
+                <p class="empty-copy">No highlighted design sections yet.</p>
+              </div>
+            </section>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const SAMPLE_MARKDOWN = `---
+name: sample-lab-portfolio
+description: Sample design document adapted from the lab portfolio structure for testing Visualise Design MD.
+colors:
+  accent: "#da7d91"
+  bg: "#faf9f7"
+  surface: "#f3f1ee"
+  fg: "#111110"
+typography:
+  display: "Bricolage Grotesque"
+  body: "Geist"
+  label: "JetBrains Mono"
+---
+
+# Design System: Sample Lab Portfolio
+
+## 1. Overview
+
+**Creative North Star:** The Warm Studio.
+
+This sample represents a warm, editorial portfolio experience. It uses soft neutral surfaces, a single rose accent, careful typography, and restrained motion. The goal is to make the page feel personal and deliberate without relying on generic developer-portfolio patterns.
+
+### Verification Checklist
+
+- [x] Define creative direction
+- [x] Document color palette
+- [ ] Confirm final responsive behavior
+- [ ] Review accessibility states
+
+## 2. Colors: Rose-Warm Palette
+
+| Token | Value | Usage |
+| --- | --- | --- |
+| Studio Rose | \`#da7d91\` | Accent, active pills, availability indicator |
+| Warm Cream | \`#faf9f7\` | Page background |
+| Linen | \`#f3f1ee\` | Raised surfaces |
+| Charcoal Warm | \`#111110\` | Primary text |
+
+### Color Rules
+
+- [x] Use the accent on less than 10% of the screen.
+- [x] Avoid pure black and pure white.
+- [ ] Validate contrast ratios for accent text.
+
+## 3. Typography
+
+| Role | Font | Notes |
+| --- | --- | --- |
+| Display | Bricolage Grotesque | Hero name and large section headings |
+| Body | Geist | Paragraph copy and supporting text |
+| Label | JetBrains Mono | Chips, status text, metadata |
+
+The display type should feel expressive but not loud. Body copy should stay readable with comfortable line length.
+
+## 4. Components
+
+### Buttons
+
+- Primary buttons use a dark fill and warm background text.
+- Ghost buttons use the raised surface token and a subtle border.
+- Hover uses small translate and opacity changes.
+
+### Chips / Pills
+
+- [x] Use rectangular pills with 3px to 4px radius.
+- [ ] Confirm chip wrapping on mobile.
+
+### Cards
+
+Cards use tonal layering and borders instead of shadows.
+
+## 5. Screens
+
+| Screen | Purpose | Status |
+| --- | --- | --- |
+| Hero | Introduce the person and tone | Ready |
+| Projects | Show selected work | Needs copy pass |
+| Contact | Provide next action | Draft |
+
+## 6. States
+
+### Hover
+
+Hover states should be subtle and limited to opacity or transform.
+
+### Focus
+
+Focus states must remain visible for keyboard users.
+
+### Empty
+
+## 7. Interactions
+
+- Avatar images may crossfade every few seconds.
+- Reduced motion should freeze decorative animation.
+- Navigation appears after the user scrolls past the hero.
+
+## 8. Acceptance Criteria
+
+- [x] Design document includes colors, typography, components, states, and interactions.
+- [ ] Viewer flags the intentionally empty \`Empty\` state section.
+- [ ] Viewer detects this unchecked acceptance item.
+- [ ] Viewer renders all tables as clean HTML tables.
+
+## 8. Acceptance Criteria
+
+This duplicate heading is intentional so the viewer can test duplicate heading warnings.
+`;
+
+    const DESIGN_SECTION_PATTERNS = [
+      "components",
+      "screens",
+      "tokens",
+      "states",
+      "interactions",
+      "acceptance criteria",
+      "user flows",
+      "data",
+      "accessibility",
+      "edge cases",
+      "open questions",
+      "colors",
+      "typography"
+    ];
+
+    const state = {
+      markdown: "",
+      fileName: "",
+      fileSize: 0,
+      parsed: null,
+      query: ""
+    };
+
+    const els = {
+      fileInput: document.getElementById("fileInput"),
+      fileStatus: document.getElementById("fileStatus"),
+      sampleButton: document.getElementById("sampleButton"),
+      sampleButtonLarge: document.getElementById("sampleButtonLarge"),
+      dropZone: document.getElementById("dropZone"),
+      searchInput: document.getElementById("searchInput"),
+      metrics: document.getElementById("metrics"),
+      outlineNav: document.getElementById("outlineNav"),
+      outlineCount: document.getElementById("outlineCount"),
+      issueList: document.getElementById("issueList"),
+      issueCount: document.getElementById("issueCount"),
+      renderedOutput: document.getElementById("renderedOutput"),
+      rawOutput: document.getElementById("rawOutput"),
+      rawLineCount: document.getElementById("rawLineCount"),
+      sectionBadge: document.getElementById("sectionBadge"),
+      documentViewTitle: document.getElementById("documentViewTitle"),
+      documentStatus: document.getElementById("documentStatus"),
+      documentName: document.getElementById("documentName"),
+      documentMeta: document.getElementById("documentMeta"),
+      searchStatus: document.getElementById("searchStatus"),
+      uncheckedCount: document.getElementById("uncheckedCount"),
+      uncheckedList: document.getElementById("uncheckedList"),
+      tableCount: document.getElementById("tableCount"),
+      tableList: document.getElementById("tableList"),
+      componentCount: document.getElementById("componentCount"),
+      componentList: document.getElementById("componentList"),
+      designSectionCount: document.getElementById("designSectionCount"),
+      sectionList: document.getElementById("sectionList")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeRegExp(value) {
+      return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function slugify(value, fallback) {
+      const slug = value
+        .toLowerCase()
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      return slug || fallback;
+    }
+
+    function normalizeHeading(value) {
+      return value.toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return "0 B";
+      const units = ["B", "KB", "MB"];
+      let size = bytes;
+      let unit = 0;
+      while (size >= 1024 && unit < units.length - 1) {
+        size /= 1024;
+        unit += 1;
+      }
+      return `${size.toFixed(size >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
+    }
+
+    function stripFrontMatter(markdown) {
+      if (!markdown.startsWith("---")) {
+        return { content: markdown, frontMatter: "" };
+      }
+      const lines = markdown.split(/\r?\n/);
+      for (let index = 1; index < lines.length; index += 1) {
+        if (lines[index].trim() === "---") {
+          return {
+            frontMatter: lines.slice(0, index + 1).join("\n"),
+            content: lines.slice(index + 1).join("\n")
+          };
+        }
+      }
+      return { content: markdown, frontMatter: "" };
+    }
+
+    function splitTableRow(line) {
+      return line
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((cell) => cell.trim());
+    }
+
+    function isTableDivider(line) {
+      return /^\s*\|?[\s:|-]+\|[\s:|-]+\|?\s*$/.test(line);
+    }
+
+    function isTableStart(lines, index) {
+      return /\|/.test(lines[index] || "") && isTableDivider(lines[index + 1] || "");
+    }
+
+    function parseInline(value, query = "") {
+      let html = escapeHtml(value);
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+      if (query.trim()) {
+        const pattern = new RegExp(`(${escapeRegExp(escapeHtml(query.trim()))})`, "gi");
+        html = html.replace(pattern, "<mark>$1</mark>");
+      }
+      return html;
+    }
+
+    function normalizeColorValue(value) {
+      const trimmed = value.trim().replace(/^`|`$/g, "").trim();
+      if (/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(trimmed)) {
+        return trimmed;
+      }
+      if (/^(rgb|rgba|hsl|hsla|oklch|oklab|lab|lch)\(([^()]|\([^)]*\))*\)$/i.test(trimmed)) {
+        return trimmed;
+      }
+      return "";
+    }
+
+    function renderTableCell(value, query = "") {
+      const color = normalizeColorValue(value);
+      if (!color) {
+        return parseInline(value, query);
+      }
+      return `<span class="color-value"><span class="color-swatch" style="--swatch-color: ${escapeHtml(color)}" aria-label="Color ${escapeHtml(color)}"></span>${parseInline(value, query)}</span>`;
+    }
+
+    function getDesignSectionLabel(title) {
+      const normalized = normalizeHeading(title).replace(/^\d+\.\s*/, "");
+      return DESIGN_SECTION_PATTERNS.find((pattern) => normalized.includes(pattern)) || "";
+    }
+
+    function getHeadingEndLine(headings, heading, totalLines) {
+      const next = headings.find((candidate) => candidate.line > heading.line && candidate.depth <= heading.depth);
+      return next ? next.line - 1 : totalLines;
+    }
+
+    function getHeadingContent(lines, heading, endLine) {
+      return lines.slice(heading.line, endLine);
+    }
+
+    function extractComponentNotes(content) {
+      return content
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith("|") && !isTableDivider(line))
+        .filter((line) => !/^```/.test(line))
+        .map((line) => line.replace(/^[-*]\s+/, "").replace(/^\*\*([^*]+)\*\*:?\s*/, "$1: "))
+        .slice(0, 3);
+    }
+
+    function extractComponents(headings, lines) {
+      const components = [];
+      const componentParents = headings.filter((heading) => {
+        const normalized = normalizeHeading(heading.title).replace(/^\d+\.\s*/, "");
+        return normalized === "components" || normalized.includes("components");
+      });
+
+      componentParents.forEach((parent) => {
+        const parentEnd = getHeadingEndLine(headings, parent, lines.length);
+        headings
+          .filter((heading) => heading.line > parent.line && heading.line <= parentEnd && heading.depth === parent.depth + 1)
+          .forEach((heading) => {
+            const endLine = getHeadingEndLine(headings, heading, lines.length);
+            const notes = extractComponentNotes(getHeadingContent(lines, heading, endLine));
+            components.push({
+              title: heading.title,
+              line: heading.line,
+              notes,
+              parent: parent.title
+            });
+          });
+      });
+
+      return components;
+    }
+
+    function renderComponentSample(component) {
+      const normalized = normalizeHeading(component.title);
+      if (normalized.includes("button")) {
+        return `<div class="component-preview" aria-label="Button preview">
+          <span class="sample-button primary">Primary</span>
+          <span class="sample-button ghost">Ghost</span>
+        </div>`;
+      }
+      if (normalized.includes("chip") || normalized.includes("pill") || normalized.includes("tag")) {
+        return `<div class="component-preview" aria-label="Chip preview">
+          <span class="component-chip">neutral</span>
+          <span class="component-chip" style="background: var(--accent-soft); color: var(--accent); border-color: color-mix(in oklch, var(--accent) 30%, var(--line));">accent</span>
+          <span class="component-chip">status</span>
+        </div>`;
+      }
+      if (normalized.includes("card") || normalized.includes("container")) {
+        return `<div class="component-preview" aria-label="Card preview">
+          <span class="sample-card"><strong>Project card</strong><span>Bordered surface, compact copy, no decoration.</span></span>
+        </div>`;
+      }
+      if (normalized.includes("nav")) {
+        return `<div class="component-preview" aria-label="Navigation preview">
+          <span class="sample-nav"><span>overview</span><span>work</span><span>contact</span></span>
+        </div>`;
+      }
+      if (normalized.includes("avatar")) {
+        return `<div class="component-preview" aria-label="Avatar preview">
+          <span class="sample-avatar"></span>
+          <span class="component-chip">signature visual</span>
+        </div>`;
+      }
+      if (normalized.includes("state")) {
+        return `<div class="component-preview" aria-label="State preview">
+          <span class="sample-state-stack">
+            <span class="sample-state-row">Default <span class="sample-state-dot"></span></span>
+            <span class="sample-state-row">Hover <span class="sample-state-dot" style="background: var(--accent);"></span></span>
+          </span>
+        </div>`;
+      }
+      return `<div class="component-preview" aria-label="Component preview">
+        <span class="sample-card"><strong>${escapeHtml(component.title)}</strong><span>${component.notes[0] ? parseInline(component.notes[0], state.query) : "Documented component"}</span></span>
+      </div>`;
+    }
+
+    function parseMarkdown(markdown) {
+      const { content, frontMatter } = stripFrontMatter(markdown);
+      const lines = content.split(/\r?\n/);
+      const allLines = markdown.split(/\r?\n/);
+      const headings = [];
+      const checklist = [];
+      const tables = [];
+      const issues = [];
+      const designSections = [];
+      let components = [];
+      const headingCounts = new Map();
+      const slugCounts = new Map();
+      const sections = [];
+      let currentSection = null;
+      let inCodeBlock = false;
+
+      if (frontMatter) {
+        issues.push({
+          severity: "info",
+          title: "Front matter detected",
+          detail: "YAML-style front matter is preserved in raw Markdown and excluded from section checks.",
+          ref: "top"
+        });
+      }
+
+      lines.forEach((line, index) => {
+        if (/^```/.test(line.trim())) {
+          inCodeBlock = !inCodeBlock;
+          return;
+        }
+        if (inCodeBlock) return;
+
+        const headingMatch = /^(#{1,6})\s+(.+?)\s*$/.exec(line);
+        if (headingMatch) {
+          if (currentSection) {
+            currentSection.endLine = index;
+            sections.push(currentSection);
+          }
+
+          const depth = headingMatch[1].length;
+          const title = headingMatch[2].trim();
+          const normalized = normalizeHeading(title);
+          const slugBase = slugify(title, `heading-${index + 1}`);
+          const slugNumber = slugCounts.get(slugBase) || 0;
+          slugCounts.set(slugBase, slugNumber + 1);
+          const id = slugNumber ? `${slugBase}-${slugNumber + 1}` : slugBase;
+          const count = headingCounts.get(normalized) || 0;
+          headingCounts.set(normalized, count + 1);
+          const designLabel = getDesignSectionLabel(title);
+          const heading = {
+            id,
+            depth,
+            title,
+            normalized,
+            line: index + 1,
+            duplicate: count > 0,
+            designLabel
+          };
+          headings.push(heading);
+          if (designLabel) {
+            designSections.push(heading);
+          }
+          currentSection = {
+            id,
+            depth,
+            title,
+            normalized,
+            startLine: index + 1,
+            endLine: lines.length,
+            content: []
+          };
+          return;
+        }
+
+        if (currentSection) {
+          currentSection.content.push(line);
+        }
+
+        const checklistMatch = /^\s*[-*]\s+\[([ xX])\]\s+(.+)$/.exec(line);
+        if (checklistMatch) {
+          checklist.push({
+            checked: checklistMatch[1].toLowerCase() === "x",
+            text: checklistMatch[2].trim(),
+            line: index + 1,
+            section: currentSection ? currentSection.title : "Document"
+          });
+        }
+      });
+
+      if (currentSection) {
+        sections.push(currentSection);
+      }
+
+      components = extractComponents(headings, lines);
+
+      for (let index = 0; index < lines.length; index += 1) {
+        if (!isTableStart(lines, index)) continue;
+        const header = splitTableRow(lines[index]);
+        const rows = [];
+        let cursor = index + 2;
+        while (cursor < lines.length && /\|/.test(lines[cursor]) && lines[cursor].trim()) {
+          rows.push(splitTableRow(lines[cursor]));
+          cursor += 1;
+        }
+        tables.push({
+          line: index + 1,
+          columns: header.length,
+          rows: rows.length,
+          header,
+          body: rows
+        });
+        index = cursor - 1;
+      }
+
+      headingCounts.forEach((count, normalized) => {
+        if (count > 1) {
+          const duplicates = headings.filter((heading) => heading.normalized === normalized);
+          issues.push({
+            severity: "warning",
+            title: "Duplicate heading",
+            detail: `"${duplicates[0].title}" appears ${count} times. Rename or clarify duplicate sections before handoff.`,
+            ref: `lines ${duplicates.map((heading) => heading.line).join(", ")}`
+          });
+        }
+      });
+
+      sections.forEach((section) => {
+        const heading = headings.find((item) => item.id === section.id);
+        const endLine = heading ? getHeadingEndLine(headings, heading, lines.length) : section.endLine;
+        const hasChildHeadings = heading ? headings.some((item) => item.line > heading.line && item.line <= endLine && item.depth > heading.depth) : false;
+        const meaningful = section.content
+          .map((line) => line.trim())
+          .filter((line) => line && !/^<!--.*-->$/.test(line));
+        if (meaningful.length === 0 && !hasChildHeadings) {
+          issues.push({
+            severity: section.depth <= 2 ? "error" : "warning",
+            title: "Empty section",
+            detail: `"${section.title}" has no content before the next heading.`,
+            ref: `line ${section.startLine}`
+          });
+        }
+      });
+
+      const unchecked = checklist.filter((item) => !item.checked);
+      if (unchecked.length) {
+        issues.push({
+          severity: "warning",
+          title: "Unchecked checklist items",
+          detail: `${unchecked.length} verification item${unchecked.length === 1 ? "" : "s"} still need attention.`,
+          ref: "checklists"
+        });
+      }
+
+      if (!headings.length) {
+        issues.push({
+          severity: "error",
+          title: "No headings found",
+          detail: "The document needs headings before it can produce a useful outline.",
+          ref: "document"
+        });
+      }
+
+      if (tables.length) {
+        issues.push({
+          severity: "info",
+          title: "Tables detected",
+          detail: `${tables.length} Markdown table${tables.length === 1 ? "" : "s"} found and rendered as HTML.`,
+          ref: "tables"
+        });
+      }
+
+      const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+      return {
+        content,
+        frontMatter,
+        lines,
+        allLines,
+        headings,
+        checklist,
+        tables,
+        issues,
+        sections,
+        designSections,
+        components,
+        stats: {
+          words,
+          lines: allLines.length,
+          headings: headings.length,
+          tables: tables.length,
+          checked: checklist.filter((item) => item.checked).length,
+          unchecked: checklist.filter((item) => !item.checked).length,
+          checklist: checklist.length,
+          components: components.length,
+          issues: issues.length
+        }
+      };
+    }
+
+    function renderMarkdown(parsed, query = "") {
+      const lines = parsed.content.split(/\r?\n/);
+      const chunks = [];
+      let index = 0;
+      let inCodeBlock = false;
+      let codeLines = [];
+      let listType = "";
+      let listItems = [];
+
+      function flushList() {
+        if (!listType) return;
+        if (listType === "checklist") {
+          chunks.push(`<ul class="checklist">${listItems.join("")}</ul>`);
+        } else {
+          chunks.push(`<${listType}>${listItems.join("")}</${listType}>`);
+        }
+        listType = "";
+        listItems = [];
+      }
+
+      function flushCode() {
+        if (!inCodeBlock) return;
+        chunks.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+        codeLines = [];
+        inCodeBlock = false;
+      }
+
+      while (index < lines.length) {
+        const line = lines[index];
+
+        if (/^```/.test(line.trim())) {
+          if (inCodeBlock) {
+            flushCode();
+          } else {
+            flushList();
+            inCodeBlock = true;
+            codeLines = [];
+          }
+          index += 1;
+          continue;
+        }
+
+        if (inCodeBlock) {
+          codeLines.push(line);
+          index += 1;
+          continue;
+        }
+
+        if (isTableStart(lines, index)) {
+          flushList();
+          const header = splitTableRow(lines[index]);
+          const body = [];
+          let cursor = index + 2;
+          while (cursor < lines.length && /\|/.test(lines[cursor]) && lines[cursor].trim()) {
+            body.push(splitTableRow(lines[cursor]));
+            cursor += 1;
+          }
+          chunks.push(renderTable(header, body, query));
+          index = cursor;
+          continue;
+        }
+
+        const headingMatch = /^(#{1,6})\s+(.+?)\s*$/.exec(line);
+        if (headingMatch) {
+          flushList();
+          const depth = headingMatch[1].length;
+          const title = headingMatch[2].trim();
+          const heading = parsed.headings.find((item) => item.title === title && !chunks.join("").includes(`id="${item.id}"`));
+          const id = heading ? heading.id : slugify(title, `heading-${index + 1}`);
+          const label = heading && heading.designLabel ? `<span class="section-highlight">${escapeHtml(heading.designLabel)}</span>` : "";
+          const searchClass = query && sectionMatchesQuery(parsed, id, query) ? " class=\"search-hit\"" : "";
+          chunks.push(`<h${depth} id="${id}"${searchClass}>${parseInline(title, query)}${label}</h${depth}>`);
+          index += 1;
+          continue;
+        }
+
+        const checklistMatch = /^\s*[-*]\s+\[([ xX])\]\s+(.+)$/.exec(line);
+        if (checklistMatch) {
+          if (listType && listType !== "checklist") flushList();
+          listType = "checklist";
+          const checked = checklistMatch[1].toLowerCase() === "x";
+          listItems.push(`<li class="check-item ${checked ? "checked" : ""}"><span class="fake-check" aria-hidden="true">${checked ? "✓" : ""}</span><span>${parseInline(checklistMatch[2], query)}</span></li>`);
+          index += 1;
+          continue;
+        }
+
+        const unorderedMatch = /^\s*[-*]\s+(.+)$/.exec(line);
+        if (unorderedMatch) {
+          if (listType && listType !== "ul") flushList();
+          listType = "ul";
+          listItems.push(`<li>${parseInline(unorderedMatch[1], query)}</li>`);
+          index += 1;
+          continue;
+        }
+
+        const orderedMatch = /^\s*\d+\.\s+(.+)$/.exec(line);
+        if (orderedMatch) {
+          if (listType && listType !== "ol") flushList();
+          listType = "ol";
+          listItems.push(`<li>${parseInline(orderedMatch[1], query)}</li>`);
+          index += 1;
+          continue;
+        }
+
+        if (/^>\s?/.test(line)) {
+          flushList();
+          chunks.push(`<blockquote>${parseInline(line.replace(/^>\s?/, ""), query)}</blockquote>`);
+          index += 1;
+          continue;
+        }
+
+        if (!line.trim()) {
+          flushList();
+          index += 1;
+          continue;
+        }
+
+        flushList();
+        chunks.push(`<p>${parseInline(line, query)}</p>`);
+        index += 1;
+      }
+
+      flushList();
+      flushCode();
+      return chunks.join("\n");
+    }
+
+    function renderTable(header, body, query) {
+      const headHtml = header.map((cell) => `<th>${parseInline(cell, query)}</th>`).join("");
+      const bodyHtml = body.map((row) => {
+        const cells = header.map((_, cellIndex) => `<td>${renderTableCell(row[cellIndex] || "", query)}</td>`).join("");
+        return `<tr>${cells}</tr>`;
+      }).join("");
+      return `<div class="table-wrap"><table><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
+    }
+
+    function sectionMatchesQuery(parsed, sectionId, query) {
+      const needle = query.trim().toLowerCase();
+      if (!needle) return false;
+      const section = parsed.sections.find((item) => item.id === sectionId);
+      if (!section) return false;
+      return `${section.title}\n${section.content.join("\n")}`.toLowerCase().includes(needle);
+    }
+
+    function highlightRaw(markdown, query) {
+      const escaped = escapeHtml(markdown);
+      if (!query.trim()) return escaped;
+      const pattern = new RegExp(`(${escapeRegExp(escapeHtml(query.trim()))})`, "gi");
+      return escaped.replace(pattern, "<mark>$1</mark>");
+    }
+
+    function setDocument(markdown, fileName, fileSize = 0) {
+      state.markdown = markdown;
+      state.fileName = fileName;
+      state.fileSize = fileSize || new Blob([markdown]).size;
+      state.parsed = parseMarkdown(markdown);
+      state.query = "";
+      els.searchInput.value = "";
+      els.searchInput.disabled = false;
+      render();
+    }
+
+    function render() {
+      if (!state.parsed) {
+        renderMetrics(null);
+        return;
+      }
+
+      const parsed = state.parsed;
+      const query = state.query.trim();
+      els.dropZone.hidden = true;
+      els.documentStatus.hidden = false;
+      els.fileStatus.textContent = `${state.fileName} loaded locally`;
+      els.documentName.textContent = state.fileName;
+      els.documentMeta.textContent = `${formatBytes(state.fileSize)} · ${parsed.stats.lines} lines · ${parsed.stats.words} words`;
+      els.rawLineCount.textContent = `${parsed.stats.lines} lines`;
+      els.sectionBadge.textContent = `${parsed.designSections.length} sections`;
+      els.renderedOutput.innerHTML = renderMarkdown(parsed, query);
+      els.rawOutput.innerHTML = highlightRaw(state.markdown, query);
+      renderMetrics(parsed);
+      renderOutline(parsed);
+      renderIssues(parsed);
+      renderUnchecked(parsed);
+      renderTables(parsed);
+      renderComponents(parsed);
+      renderDesignSections(parsed);
+      renderSearchStatus(parsed, query);
+      updateDocumentViewMeta();
+    }
+
+    function updateDocumentViewMeta() {
+      const isRaw = document.body.dataset.mobileView === "raw";
+      els.documentViewTitle.textContent = isRaw ? "Raw Markdown" : "Rendered";
+      els.sectionBadge.hidden = isRaw;
+      els.rawLineCount.hidden = !isRaw;
+    }
+
+    function renderMetrics(parsed) {
+      const stats = parsed ? parsed.stats : { headings: 0, tables: 0, checklist: 0, unchecked: 0, issues: 0 };
+      const items = [
+        ["Headings", stats.headings, ""],
+        ["Issues", stats.issues, stats.issues ? "error" : ""],
+        ["Unchecked", stats.unchecked, stats.unchecked ? "warning" : ""],
+        ["Components", stats.components || 0, ""],
+        ["Tables", stats.tables, ""]
+      ];
+      els.metrics.innerHTML = items.map(([label, value, tone]) => (
+        `<span class="metric ${tone}"><strong>${value}</strong><span>${label}</span></span>`
+      )).join("");
+    }
+
+    function renderOutline(parsed) {
+      els.outlineCount.textContent = parsed.headings.length;
+      if (!parsed.headings.length) {
+        els.outlineNav.innerHTML = '<p class="empty-copy">No headings detected.</p>';
+        return;
+      }
+      els.outlineNav.innerHTML = parsed.headings.map((heading) => {
+        const duplicate = heading.duplicate ? '<span class="badge warning">dup</span>' : "";
+        return `<a class="depth-${heading.depth}" href="#${heading.id}"><span>${escapeHtml(heading.title)}</span>${duplicate}</a>`;
+      }).join("");
+    }
+
+    function renderIssues(parsed) {
+      els.issueCount.textContent = parsed.issues.length;
+      if (!parsed.issues.length) {
+        els.issueList.innerHTML = '<p class="empty-copy">No issues detected.</p>';
+        return;
+      }
+      els.issueList.innerHTML = parsed.issues.map((issue) => (
+        `<article class="issue">
+          <div class="issue-head">
+            <span class="issue-title">${escapeHtml(issue.title)}</span>
+            <span class="badge ${issue.severity}">${issue.severity}</span>
+          </div>
+          <p>${escapeHtml(issue.detail)}</p>
+          <p>${escapeHtml(issue.ref)}</p>
+        </article>`
+      )).join("");
+    }
+
+    function renderUnchecked(parsed) {
+      const unchecked = parsed.checklist.filter((item) => !item.checked);
+      els.uncheckedCount.textContent = unchecked.length;
+      if (!unchecked.length) {
+        els.uncheckedList.innerHTML = '<p class="empty-copy">All checklist items are checked.</p>';
+        return;
+      }
+      els.uncheckedList.innerHTML = unchecked.map((item) => (
+        `<article class="review-item">
+          <span class="review-title">${parseInline(item.text, state.query)}</span>
+          <p>${escapeHtml(item.section)} · line ${item.line}</p>
+        </article>`
+      )).join("");
+    }
+
+    function renderTables(parsed) {
+      els.tableCount.textContent = parsed.tables.length;
+      if (!parsed.tables.length) {
+        els.tableList.innerHTML = '<p class="empty-copy">No Markdown tables detected.</p>';
+        return;
+      }
+      els.tableList.innerHTML = parsed.tables.map((table, index) => (
+        `<article class="review-item">
+          <span class="review-title">Table ${index + 1}</span>
+          <p>Starts line ${table.line}</p>
+          <div class="table-meta">
+            <span class="badge info">${table.columns} columns</span>
+            <span class="badge info">${table.rows} rows</span>
+          </div>
+        </article>`
+      )).join("");
+    }
+
+    function renderComponents(parsed) {
+      els.componentCount.textContent = parsed.components.length;
+      if (!parsed.components.length) {
+        els.componentList.innerHTML = '<p class="empty-copy">No component subsections detected.</p>';
+        return;
+      }
+      els.componentList.innerHTML = parsed.components.map((component) => {
+        const notes = component.notes.length
+          ? `<ul class="component-notes">${component.notes.map((note) => `<li>${parseInline(note, state.query)}</li>`).join("")}</ul>`
+          : '<p>No component notes found.</p>';
+        return `<article class="review-item component-card">
+          <span class="review-title">${parseInline(component.title, state.query)}</span>
+          <p>${escapeHtml(component.parent)} · line ${component.line}</p>
+          ${renderComponentSample(component)}
+          ${notes}
+        </article>`;
+      }).join("");
+    }
+
+    function renderDesignSections(parsed) {
+      els.designSectionCount.textContent = parsed.designSections.length;
+      if (!parsed.designSections.length) {
+        els.sectionList.innerHTML = '<p class="empty-copy">No known design sections detected.</p>';
+        return;
+      }
+      els.sectionList.innerHTML = parsed.designSections.map((section) => (
+        `<article class="review-item">
+          <span class="review-title">${escapeHtml(section.title)}</span>
+          <p>${escapeHtml(section.designLabel)} · line ${section.line}</p>
+        </article>`
+      )).join("");
+    }
+
+    function renderSearchStatus(parsed, query) {
+      if (!query) {
+        els.searchStatus.textContent = "Search inactive";
+        return;
+      }
+      const lower = query.toLowerCase();
+      const matches = [
+        ...parsed.headings.filter((item) => item.title.toLowerCase().includes(lower)),
+        ...parsed.checklist.filter((item) => item.text.toLowerCase().includes(lower)),
+        ...parsed.tables.filter((table) => `${table.header.join(" ")} ${table.body.flat().join(" ")}`.toLowerCase().includes(lower))
+      ];
+      const rawMatch = state.markdown.toLowerCase().includes(lower) ? 1 : 0;
+      els.searchStatus.textContent = `${matches.length + rawMatch} match source${matches.length + rawMatch === 1 ? "" : "s"}`;
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      const validName = /\.(md|markdown)$/i.test(file.name);
+      const validType = !file.type || file.type === "text/markdown" || file.type === "text/plain";
+      if (!validName && !validType) {
+        alert("Please choose a .md or .markdown file.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => setDocument(String(reader.result || ""), file.name, file.size);
+      reader.onerror = () => alert("Could not read this file.");
+      reader.readAsText(file);
+    }
+
+    els.fileInput.addEventListener("change", (event) => {
+      handleFile(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    els.sampleButton.addEventListener("click", () => setDocument(SAMPLE_MARKDOWN, "examples/design.md"));
+    els.sampleButtonLarge.addEventListener("click", () => setDocument(SAMPLE_MARKDOWN, "examples/design.md"));
+
+    els.searchInput.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      render();
+    });
+
+    els.dropZone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      els.dropZone.classList.add("dragging");
+    });
+
+    els.dropZone.addEventListener("dragleave", () => {
+      els.dropZone.classList.remove("dragging");
+    });
+
+    els.dropZone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      els.dropZone.classList.remove("dragging");
+      handleFile(event.dataTransfer.files[0]);
+    });
+
+    document.querySelectorAll("[data-view-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.body.dataset.mobileView = button.dataset.viewTab;
+        document.querySelectorAll("[data-view-tab]").forEach((tab) => {
+          tab.classList.toggle("active", tab === button);
+        });
+        updateDocumentViewMeta();
+      });
+    });
+
+    document.querySelectorAll("[data-inspector-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.inspectorTab;
+        document.querySelectorAll("[data-inspector-tab]").forEach((tab) => {
+          tab.classList.toggle("active", tab === button);
+        });
+        document.querySelectorAll("[data-inspector-panel]").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.inspectorPanel === target);
+        });
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest(".outline a");
+      if (!link) return;
+      document.querySelectorAll(".outline a").forEach((item) => item.classList.remove("active"));
+      link.classList.add("active");
+    });
+
+    renderMetrics(null);
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sample") === "1") {
+      setDocument(SAMPLE_MARKDOWN, "examples/design.md");
+      const query = params.get("q");
+      if (query) {
+        els.searchInput.value = query;
+        state.query = query;
+        render();
+      }
+    }
+  </script>
+</body>
+</html>
