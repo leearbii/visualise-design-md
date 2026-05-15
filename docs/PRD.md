@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-We are building **Visualise Design MD**, a static browser tool that helps product builders, designers, and engineers review `design.md` files without installing dependencies or uploading private content. Users will open `design-viewer.html`, drag in a Markdown design document, and immediately see a structured review workspace with rendered content, a heading outline, checklist verification, table previews, issue detection, search, and raw Markdown for comparison. The goal is to make design documents easier to inspect before implementation, reducing missed requirements, unchecked acceptance criteria, and ambiguous handoff quality.
+We are building **Visualise Design MD**, a static browser tool that helps product builders, designers, and engineers review `design.md` files without installing dependencies or uploading private content. Users will open `design-viewer.html`, drag in a Markdown design document, and immediately see a structured review workspace with rendered content, a heading outline, checklist verification, table previews, issue detection, browser-native search, and raw Markdown for comparison. The goal is to make design documents easier to inspect before implementation, reducing missed requirements, unchecked acceptance criteria, and ambiguous handoff quality.
 
 ## 2. Problem Statement
 
@@ -163,7 +163,7 @@ As a reviewer, I want to drag/drop or select a `.md` file so I can inspect it wi
 
 Acceptance criteria:
 
-- [ ] The page provides a visible drop zone.
+- [ ] The document canvas provides a visible empty state and accepts drag/drop.
 - [ ] The page provides a file picker.
 - [ ] The tool accepts `.md` and `.markdown` files.
 - [ ] The tool rejects unsupported file types with a clear message.
@@ -226,15 +226,15 @@ Acceptance criteria:
 - [ ] The issue panel supports `info`, `warning`, and `error` severity levels.
 - [ ] Each severity has a distinct visual color treatment.
 
-### Story 7: Search Across Review Signals
+### Story 7: Browser-Native Search
 
-As a reviewer, I want to search/filter document content so I can find relevant design details quickly.
+As a reviewer, I want rendered and raw content to remain searchable with browser find so I can avoid learning a custom search control.
 
 Acceptance criteria:
 
-- [ ] Search input checks headings, checklist items, table text, and raw Markdown matches.
-- [ ] Version one highlights matching rendered sections instead of hiding non-matching content.
-- [ ] Empty search returns the full view.
+- [ ] No custom search input is shown in the app chrome.
+- [ ] Rendered Markdown remains real DOM text, not canvas or images.
+- [ ] Raw Markdown mode remains selectable so browser find can inspect source text.
 - [ ] Search has no network dependency.
 
 ### Story 8: Use A Realistic Sample Document
@@ -289,9 +289,9 @@ Future consideration:
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Handwritten Markdown parser misses edge cases | Some documents render imperfectly | Keep parser scoped to design docs; document known limitations; add examples for expected syntax |
-| Large Markdown files slow the page | Poor review experience | Avoid expensive repeated parsing; debounce search; cap heavy operations if needed |
+| Large Markdown files slow the page | Poor review experience | Avoid expensive repeated parsing; cap heavy operations if needed |
 | Table parsing breaks on escaped pipes or complex multiline tables | Incorrect table rendering | Support simple pipe tables first; preserve raw Markdown for fallback comparison |
-| Side-by-side UI becomes cramped on mobile | Poor small-screen usability | Use responsive tabs or stacked layout on narrow viewports |
+| Supporting review panels compete with the document | Poor review focus | Keep rendered content primary; place raw Markdown behind a toggle and review details in a compact annotation rail |
 | Users expect editing/saving | Misaligned expectations | Make version-one scope clear in README and UI copy |
 
 ## 10. Open Questions
@@ -300,7 +300,7 @@ Resolved decisions:
 
 - Version one will include `examples/design.md`.
 - The sample file will use the user's lab portfolio `DESIGN.md` as the structural reference.
-- Narrow screens will use tabs first for rendered/raw comparison.
+- Rendered/raw comparison will use a toggle inside the document canvas instead of permanent side-by-side panels.
 - Initial deployment documentation will target Vercel only.
 - Issue severity will use `info`, `warning`, and `error`, each with distinct colors.
 - Search will highlight matching rendered sections in version one instead of hiding non-matching sections.
@@ -334,7 +334,7 @@ Capabilities:
 
 Deliverables:
 
-- Improved search/filter.
+- Browser-native search behavior.
 - Better issue grouping.
 - More robust responsive behavior.
 - Manual QA checklist.

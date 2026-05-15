@@ -22,8 +22,8 @@
    - Keep the parser pragmatic and scoped to design document review.
 
 5. Render the review interface.
-   - Use the Studio Review layout: top command bar, compact status rail, document canvas, and right inspector tabs.
-   - Show a heading outline in the inspector.
+   - Use the Studio Review layout: top command bar, compact plain-text status rail, document canvas, and right annotation rail.
+   - Show a heading outline in the annotation rail.
    - Show rendered Markdown.
    - Show raw Markdown as a secondary mode behind a `Rendered / Raw` toggle in the document canvas.
    - Show highlighted design sections.
@@ -36,7 +36,7 @@
    - Summarize tables.
    - Render color swatches for color values in tables.
    - Render component previews from `Components` sections.
-   - Add search that highlights matching rendered sections.
+   - Add contextual Find that highlights matching rendered sections without occupying the global header.
 
 7. Add sample data and manual QA.
    - Create a sample `examples/design.md`.

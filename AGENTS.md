@@ -32,7 +32,7 @@ Read these files before making meaningful product or UI changes:
 - Rendered Markdown and raw Markdown must remain comparable.
 - Raw Markdown should be a secondary mode behind a `Rendered / Raw` toggle in the document canvas, not a second equal-weight panel.
 - Search highlights matches instead of hiding non-matching sections.
-- Use the Studio Review layout: top command bar, compact status rail, document canvas, and right inspector tabs.
+- Use the Studio Review layout: top command bar, compact plain-text status rail, document canvas, and right annotation rail.
 
 ## Verification Rules
 
@@ -64,6 +64,8 @@ At minimum, run a JavaScript syntax check on the embedded script after edits.
 - Use light theme by default.
 - Use semantic colors for severity, with text labels so color is not the only signal.
 - Keep the rendered Markdown canvas as the primary visual object.
+- Keep inspector tabs limited to `Review`, `Components`, and `Outline` unless there is a clear reason to expand.
+- Avoid decorative grid/glow backgrounds.
 - Avoid permanent admin sidebars, Jira-style issue-board layouts, decorative dashboards, generic SaaS card grids, heavy dark terminal aesthetics, and marketing hero layouts.
 
 ## Code Rules

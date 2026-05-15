@@ -32,7 +32,8 @@ The design should feel:
 Move away from the heavy left rail. Use:
 
 - A slim top command bar.
-- A compact document status rail.
+- A compact plain-text document status rail.
+- No custom Find control; browser search is enough for version one.
 - A floating outline drawer or compact outline column that can collapse.
 - Main content as the dominant surface.
 
@@ -66,7 +67,8 @@ The rendered document should feel like the primary object:
 Instead of separate bottom cards for unchecked items, tables, components, and sections:
 
 - Use one right-side inspector panel.
-- Add tabs: `Issues`, `Checks`, `Tables`, `Components`, `Sections`.
+- Use three tabs: `Review`, `Components`, `Outline`.
+- Put issues, unchecked items, tables, and detected design sections under `Review`.
 - Keep the inspector compact and contextual.
 
 This reduces visual noise and makes the tool feel more intentional.
@@ -110,16 +112,17 @@ Use fewer borders:
 
 Replace the generic product-tool feel with a little more character.
 
-Recommended:
+Recommended direction:
 
-- Headings: `Outfit`, `Satoshi`, or `Geist` at heavier weights.
-- UI/body: `Geist` or system sans.
+- App shell: `Geist`, `Satoshi`, or system sans.
+- Rendered document body: a reader/editorial stack such as Iowan Old Style, New York, Charter, or Georgia.
+- Rendered document headings: app sans stack for structure.
 - Raw Markdown/code: existing mono stack.
 
 If staying dependency-free, use system font but improve hierarchy:
 
-- Larger app title.
-- More confident section headings.
+- Avoid Avenir-heavy, Claude-like app typography.
+- Make document body feel like a reading surface, not a code tool.
 - Slightly tighter rendered headings.
 - Tabular numbers for metrics.
 
@@ -153,16 +156,19 @@ First screen:
 
 - Top command bar.
 - Warm background.
-- Big drop zone that becomes a health strip after file load.
+- Centered empty document canvas that accepts drops before file load.
+- Header keeps only identity and file actions in a rounded command shelf.
 - Main document canvas centered-left.
-- Inspector panel on the right with tabs.
+- Annotation rail on the right with three tabs.
 - Outline available as a compact popover/drawer, not a permanent Jira sidebar.
 
 ## Implementation Priority
 
 Implemented in the current `design-viewer.html`:
 
-- Replaced sidebar and bottom review cards with a compact status rail and right inspector tabs.
+- Replaced sidebar and bottom review cards with a compact status rail and a right annotation rail.
+- Reduced inspector tabs from six to three.
+- Removed decorative grid/glow background in favor of a quiet paper texture.
 - Warmed up the palette and reduced the admin feel.
 - Made the rendered Markdown canvas larger and more editorial.
 - Upgraded component previews into mini style-guide samples.
